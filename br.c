@@ -25,12 +25,6 @@ main (int argc,char *argv[]){
         char file_addr[1024];
         FILE *fp;
 
-        // check for file
-        if ((fp=fopen(tmp_file, "wb")) == NULL) {
-            printf("Cannot open temporary file.\n");
-            exit(1);
-        }
-
         // get file path
         getExePath(&ex_path);
         //printf("[debug] ex_path = %s\n",ex_path);
@@ -43,6 +37,12 @@ main (int argc,char *argv[]){
         strcpy(file_addr,ex_path);
         printf("[debug] file_addr=%s\n",file_addr);
 
+         // check for file
+        if ((fp=fopen(tmp_file, "wb")) == NULL) {
+            printf("Cannot open temporary file.\n");
+            exit(1);
+        }
+        
         // write tmp addr holder file
         fprintf(fp,file_addr);
         printf("bringing %s...\n",argv[1]);
