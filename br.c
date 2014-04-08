@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 // global storage file for files currently being carried (brought?) 
 char *tmp_file="/tmp/bringing";
@@ -22,18 +23,27 @@ main (int argc,char *argv[]){
 
     // if one, store
     if (argc==2) {
+        // ^^ not going to work because there could be more than 1 file 
+        // to bring.
         char file_name[]="file not available";
         char ex_path[1024];
         char file_addr[1024];
+        char wrk_dir[1024];
         FILE *fp;
 
         // get file path
-        getExePath(&ex_path);
-        if (DEBUG) printf("[debug] ex_path = %s\n",ex_path);
+        // we want the file's full path..
+        if (getWorkingDir(&wrk_dir)==0) {
+            if (DEBUG) printf ("[debug] wrk_dir = %s\n",wrk_dir);
+        }
+        // got it, now we need to add that to the file path given and that is
+        // what is stored in /tmp/bring
+        //
+        //getExePath(&ex_path);
 
         /* lets handle more than 1 file */
-        for (len
-        return 0;
+        //for (len
+        //return 0;
         strcpy(file_name,argv[1]);
         if (DEBUG) printf("[debug] file_name = %s\n",file_name);
 
@@ -46,8 +56,9 @@ main (int argc,char *argv[]){
             return 1;
         }
 
-        sprintf(file_addr,strcat(ex_path,file_name));
-        printf("[debug] file_addr=%s\n",file_addr);
+        sprintf(file_addr,strcat(wrk_dir,"/"));
+        sprintf(file_addr,strcat(wrk_dir,file_name));
+        if (DEBUG) printf("[debug] file_addr=%s\n",file_addr);
 
          // check for file
         if ((fp=fopen(tmp_file, "wb")) == NULL) {
@@ -57,7 +68,7 @@ main (int argc,char *argv[]){
         
         // write tmp addr holder file
         fprintf(fp,file_addr);
-        printf("bringing %s...\n",argv[1]);
+        if (DEBUG) printf("bringing %s...\n",argv[1]);
         fclose(fp);
     } else {
     // if none, drop
@@ -182,5 +193,13 @@ int usage(){
     printf("## Example\n [/root/]$ br main.c utils.c\n [/root/]$ cd ");
     printf("development/\n [/root/development/]$ br");
     printf("\n");
+    return 1;
+}
+int getWorkingDir(char *val) {
+    char cwd[1024];
+    if (getcwd(cwd,sizeof(cwd)) != NULL) {
+        strcpy(val,cwd);
+        return 0;
+    }
     return 1;
 }
