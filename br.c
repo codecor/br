@@ -41,7 +41,7 @@ main (int argc,char *argv[]){
         //
         //getExePath(&ex_path);
 
-        /* lets handle more than 1 file */
+        // lets handle more than 1 file 
         //for (len
         //return 0;
         strcpy(file_name,argv[1]);
@@ -49,14 +49,14 @@ main (int argc,char *argv[]){
 
         if (!access(file_name,F_OK)) // file doesn't exist then give usage and exit
         {
-            if (DEBUG) printf("file exists.\n");
+            if (DEBUG) printf("[debug] file exists.\n");
         } else {
-            if (DEBUG) printf("error: file does not exist.\n");
+            if (DEBUG) printf("[debug] error: file does not exist.\n");
             usage();
             return 1;
         }
 
-        sprintf(file_addr,strcat(wrk_dir,"/"));
+        strcat(wrk_dir,"/");
         sprintf(file_addr,strcat(wrk_dir,file_name));
         if (DEBUG) printf("[debug] file_addr=%s\n",file_addr);
 
@@ -68,8 +68,9 @@ main (int argc,char *argv[]){
         
         // write tmp addr holder file
         fprintf(fp,file_addr);
-        if (DEBUG) printf("bringing %s...\n",argv[1]);
+        if (DEBUG) printf("[debug] bringing %s...\n",file_addr);
         fclose(fp);
+        if (DEBUG) printf("[debug] fclosed\n");
     } else {
     // if none, drop
         // check for file waiting to be dropped
@@ -82,6 +83,7 @@ main (int argc,char *argv[]){
     }
     //do_bring(argc,argv[1],argv[2]);
 
+    if (DEBUG) printf("[debug] returning\n");
     return 0;
 }
 
@@ -168,7 +170,7 @@ int bring_it(){
             if(fgets(line,sizeof(line),fp)){
                 printf("copying file %s.\n",line);
                 sprintf(cmd,"/usr/bin/cp %s .",line);
-                if (DEBUG) printf("[d] [bi] [cmd] %s.\n",cmd);
+                if (DEBUG) printf("[debug] [bi] [cmd] %s.\n",cmd);
                 status=system(cmd);
                 if (status != 0) 
                     printf ("error: copy failed.\n");
@@ -176,7 +178,7 @@ int bring_it(){
                 {
                     sprintf(cmd,"/usr/bin/rm %s",tmp_file);
                     status=system(cmd);
-                    if (DEBUG) printf ("copy completed successfully\n");
+                    if (DEBUG) printf ("[debug] copy completed successfully\n");
                 }
             }
         }
