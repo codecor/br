@@ -14,21 +14,29 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-// global storage file for files currently being carried (brought?) 
+// global storage file for files currently bein brought 
 char *tmp_file="/tmp/bringing";
-int DEBUG=1;
+int DEBUG=0;
+int usage(){
+    printf("*** br - bring ***\n## Overview\n Similar to cp, br copies files.");
+    printf("br will bring the files from point a to point b.\n## Usage\n ");
+    printf("When selecting files:\n  br <somefile>\n ... do what you gotta");
+    printf("do ... go where you gotta go; then to drop: \n  br\n");
+    printf("## Example\n [/root/]$ br main.c utils.c\n [/root/]$ cd ");
+    printf("development/\n [/root/development/]$ br");
+    printf("\n");
+    return 1;
+}
 
-main (int argc,char *argv[]){
-    //printf("args: %i\narg[1]: %s\n",argc,argv[1]);
+int main (int argc,char *argv[]){
 
     // if one, store
     if (argc==2) {
         // ^^ not going to work because there could be more than 1 file 
         // to bring.
         char file_name[]="file not available";
-        char ex_path[1024];
-        char file_addr[1024];
-        char wrk_dir[1024];
+        char file_addr[4096];
+        char wrk_dir[4096];
         FILE *fp;
 
         // get file path
@@ -36,11 +44,7 @@ main (int argc,char *argv[]){
         if (getWorkingDir(&wrk_dir)==0) {
             if (DEBUG) printf ("[debug] wrk_dir = %s\n",wrk_dir);
         }
-        // got it, now we need to add that to the file path given and that is
-        // what is stored in /tmp/bring
         //
-        //getExePath(&ex_path);
-
         // lets handle more than 1 file 
         //for (len
         //return 0;
@@ -60,7 +64,7 @@ main (int argc,char *argv[]){
         sprintf(file_addr,strcat(wrk_dir,file_name));
         if (DEBUG) printf("[debug] file_addr=%s\n",file_addr);
 
-         // check for file
+        // check for file
         if ((fp=fopen(tmp_file, "wb")) == NULL) {
             printf("Cannot open temporary file.\n");
             exit(1);
@@ -72,16 +76,12 @@ main (int argc,char *argv[]){
         fclose(fp);
         if (DEBUG) printf("[debug] fclosed\n");
     } else {
-    // if none, drop
+        // if none, drop
         // check for file waiting to be dropped
-        if (bring_it()){
-            //sprintf(cmd,"cp %s .",
-        } else {
-            // error: no file to be dropped
+        if (bring_it()!=0){
             printf("No file to be brought.\n");
         }
     }
-    //do_bring(argc,argv[1],argv[2]);
 
     if (DEBUG) printf("[debug] returning\n");
     return 0;
@@ -128,38 +128,11 @@ int do_bring(int cnt,char *src,char *dest)
     fclose(out);
 }
 
-int getExePath(char *str){
-    char new_str[100];
-    int len;
-    char path[1024];
-    char* slash;
-
-    // read symbolic link /proc/self/exe
-    len = readlink("/proc/self/exe",path,sizeof(path));
-    if (len==-1)
-        return 0;
-
-    path[len]='\0';
-    //printf("[getExePath] path=%s\n",path);
-
-    // get the directory in the path by stripping exe name
-    slash = strrchr(path,'/');
-    if (!slash || slash==path)
-        return 0;
-
-    slash+=1;
-    *slash='\0';
-
-    strcpy(str,path);
-    //printf("[getExePath] str=%s\n",str);
-    return 1;
-}
-
 int bring_it(){
     // read tmp file for main() to call do_copy with...
     FILE *fp;
-    char line[300];
-    char cmd[300];
+    char line[4096];
+    char cmd[4096];
     int status;
 
     if ((fp=fopen(tmp_file,"r"))==NULL){
@@ -183,22 +156,13 @@ int bring_it(){
             }
         }
         fclose(fp);
-        return 1;
+        return 0;
     }
-}
-
-int usage(){
-    printf("*** br - bring ***\n## Overview\n Similar to cp, br copies files.");
-    printf("br will bring the files from point a to point b.\n## Usage\n ");
-    printf("When selecting files:\n  br <somefile>\n ... do what you gotta");
-    printf("do ... go where you gotta go; then to drop: \n  br\n");
-    printf("## Example\n [/root/]$ br main.c utils.c\n [/root/]$ cd ");
-    printf("development/\n [/root/development/]$ br");
-    printf("\n");
     return 1;
 }
+
 int getWorkingDir(char *val) {
-    char cwd[1024];
+    char cwd[4096];
     if (getcwd(cwd,sizeof(cwd)) != NULL) {
         strcpy(val,cwd);
         return 0;
