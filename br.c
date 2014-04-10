@@ -16,7 +16,7 @@
 
 // global storage file for files currently bein brought 
 char *tmp_file="/tmp/bringing";
-int DEBUG=0;
+int DEBUG=1;
 int usage(){
     printf("*** br - bring ***\n## Overview\n Similar to cp, br copies files.");
     printf("br will bring the files from point a to point b.\n## Usage\n ");
@@ -40,7 +40,6 @@ int main (int argc,char *argv[]){
         FILE *fp;
 
         // get file path
-        // we want the file's full path..
         if (getWorkingDir(&wrk_dir)==0) {
             if (DEBUG) printf ("[debug] wrk_dir = %s\n",wrk_dir);
         }
