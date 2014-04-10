@@ -34,7 +34,7 @@ int main (int argc,char *argv[]){
     if (argc==2) {
         // ^^ not going to work because there could be more than 1 file 
         // to bring.
-        char file_name[]="file not available";
+        char file_name[4096];
         char file_addr[4096];
         char wrk_dir[4096];
         FILE *fp;
