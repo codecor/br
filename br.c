@@ -30,50 +30,36 @@ int usage(){
 
 int main (int argc,char *argv[]){
 
-    // if one, store
-    if (argc==2) {
-        // ^^ not going to work because there could be more than 1 file 
-        // to bring.
+    // all args are meant to be brought
+    if (argc!=1) {
         char file_name[4096];
         char file_addr[4096];
         char wrk_dir[4096];
-        FILE *fp;
+        int i;
 
         // get file path
         if (getWorkingDir(&wrk_dir)==0) {
             if (DEBUG) printf ("[debug] wrk_dir = %s\n",wrk_dir);
         }
-        //
-        // lets handle more than 1 file 
-        //for (len
-        //return 0;
-        strcpy(file_name,argv[1]);
-        if (DEBUG) printf("[debug] file_name = %s\n",file_name);
 
-        if (!access(file_name,F_OK)) // file doesn't exist then give usage and exit
-        {
-            if (DEBUG) printf("[debug] file exists.\n");
-        } else {
-            if (DEBUG) printf("[debug] error: file does not exist.\n");
-            usage();
-            return 1;
+        if (DEBUG) printf("[debug] sizeof(argc)=%d\n",sizeof(argc));
+        for (i = 1; i < argc; i++) {
+            strcpy(file_name,argv[i]);
+            if (DEBUG) printf("[debug] file_name = %s\n",file_name);
+
+            fileExist(file_name);
+            sprintf(file_addr,strcat(strcat(wrk_dir,"/"),file_name));
+            if (DEBUG) printf("[debug] file_addr=%s\n",file_addr);
+
+            // add a comma if more than 1 exists
+            if (argc-i!=0)
+                storePath(strcat(file_addr,","));
+            else
+                storePath(file_addr);
         }
 
-        strcat(wrk_dir,"/");
-        sprintf(file_addr,strcat(wrk_dir,file_name));
-        if (DEBUG) printf("[debug] file_addr=%s\n",file_addr);
+        return 0;
 
-        // check for file
-        if ((fp=fopen(tmp_file, "wb")) == NULL) {
-            printf("Cannot open temporary file.\n");
-            exit(1);
-        }
-        
-        // write tmp addr holder file
-        fprintf(fp,file_addr);
-        if (DEBUG) printf("[debug] bringing %s...\n",file_addr);
-        fclose(fp);
-        if (DEBUG) printf("[debug] fclosed\n");
     } else {
         // if none, drop
         // check for file waiting to be dropped
@@ -83,6 +69,7 @@ int main (int argc,char *argv[]){
     }
 
     if (DEBUG) printf("[debug] returning\n");
+
     return 0;
 }
 
@@ -133,6 +120,9 @@ int bring_it(){
     char line[4096];
     char cmd[4096];
     int status;
+    char to_copy[1024];
+    int i;
+    char *trunc;
 
     if ((fp=fopen(tmp_file,"r"))==NULL){
         if (DEBUG) printf("cannot open %s\n",tmp_file);
@@ -140,6 +130,9 @@ int bring_it(){
     } else {
         while(!feof(fp)){
             if(fgets(line,sizeof(line),fp)){
+                if ( ((trunc = strstr( line, "," )) != NULL ) )
+                         *trunc = '\0';
+
                 printf("copying file %s.\n",line);
                 sprintf(cmd,"/usr/bin/cp %s .",line);
                 if (DEBUG) printf("[debug] [bi] [cmd] %s.\n",cmd);
@@ -167,4 +160,29 @@ int getWorkingDir(char *val) {
         return 0;
     }
     return 1;
+}
+int fileExist(char *file_name) {
+    if (!access(file_name,F_OK)) // file doesn't exist then give usage and exit
+    {
+        if (DEBUG) printf("[debug] file exists.\n");
+    } else {
+        if (DEBUG) printf("[debug] error: file does not exist.\n");
+        usage();
+        return 1;
+    }
+
+}
+int storePath(char *path) {
+        FILE *fp;
+    // check for file
+    if ((fp=fopen(tmp_file, "wb")) == NULL) {
+        printf("Cannot open temporary file.\n");
+        exit(1);
+    }
+
+    // write tmp addr holder file
+    fprintf(fp,path);
+    if (DEBUG) printf("[debug] bringing %s...\n",path);
+    fclose(fp);
+    if (DEBUG) printf("[debug] fclosed\n");
 }
